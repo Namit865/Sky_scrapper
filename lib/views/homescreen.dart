@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weather_app/provider/provider.dart';
 import 'package:weather_app/variable/weatherVariables.dart';
 
 import '../helper/apikey.dart';
-import '../provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -43,10 +43,10 @@ class _MainScreenState extends State<MainScreen> {
     return days[now.weekday - 1];
   }
 
-  int selectedColor = 0;
-
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<providers>(context);
+    var isDarkMode = provider.themeDetails.isdark;
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.only(top: 40, left: 10, right: 10),
@@ -73,23 +73,33 @@ class _MainScreenState extends State<MainScreen> {
                       style:
                           const TextStyle(color: Colors.white, fontSize: 12)),
                   const Spacer(),
-                  Switch(
-                    value: Provider.of<providers>(context)
-                        .Theme
-                        .isdark,
-                    onChanged: (value) {
-                      Provider.of<providers>(context,listen: false)
+                  IconButton(
+                    onPressed: () {
+                      Provider.of<providers>(context, listen: false)
                           .themeToggle();
                     },
+                    icon: Provider.of<providers>(context).themeDetails.isdark
+                        ? const Icon(CupertinoIcons.moon_stars,color: Colors.white,)
+                        : const Icon(CupertinoIcons.cloud_sun_rain_fill,color: Colors.white,),
                   ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    CupertinoIcons.bell,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
                   SizedBox(
                     height: 50,
-                    width: 150,
+                    width: 400,
                     child: TextField(
+                      cursorColor: Colors.white70,
                       controller: _searchconntroller,
                       style: const TextStyle(color: Colors.white),
-                      onChanged: (value) async {
-                        await fetchdata(value);
+                      onChanged: (value) {
+                        fetchdata(value);
                       },
                       decoration: const InputDecoration(
                         hintText: "Search",
@@ -101,14 +111,9 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 50),
-                  const Icon(
-                    CupertinoIcons.bell,
-                    color: Colors.white,
-                  ),
                 ],
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 20),
               SizedBox(
                 height: 180,
                 width: 180,
@@ -122,9 +127,10 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     TextSpan(
                       text: weatherdata.tempraturecelsius,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white: Colors.black
                       ),
                     ),
                     const TextSpan(
@@ -137,10 +143,10 @@ class _MainScreenState extends State<MainScreen> {
               const SizedBox(height: 10),
               Text(
                 weatherdata.weathercondition,
-                style: const TextStyle(
-                    color: Colors.white,
+                style:  TextStyle(
+                    color: isDarkMode ? Colors.white: Colors.black,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.bold,),
               ),
               const SizedBox(
                 height: 20,
@@ -150,7 +156,7 @@ class _MainScreenState extends State<MainScreen> {
                 height: 50,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.black45),
+                    color: isDarkMode ? Colors.black45: Colors.white54,),
                 child: Row(
                   children: [
                     const SizedBox(width: 15),
@@ -162,8 +168,8 @@ class _MainScreenState extends State<MainScreen> {
                       width: 5,
                     ),
                     Text(
-                      "${weatherdata.precipitation}%",
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                      "${weatherdata.precipitation}mm",
+                      style:  TextStyle(fontSize: 16, color: isDarkMode ? Colors.white: Colors.black,),
                     ),
                     const Spacer(),
                     const Icon(
@@ -172,8 +178,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       weatherdata.feelslike,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
+                      style:  TextStyle(
+                          fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white: Colors.black,),
                     ),
                     const Spacer(),
                     const Icon(
@@ -182,8 +188,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       "${weatherdata.windspeed}km/h",
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style:  TextStyle(
+                          color: isDarkMode ? Colors.white: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold),
                     ),
@@ -202,7 +208,7 @@ class _MainScreenState extends State<MainScreen> {
                 width: 350,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.black45,
+                  color: isDarkMode ? Colors.black45: Colors.white54,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -211,16 +217,16 @@ class _MainScreenState extends State<MainScreen> {
                       children: [
                         Text(
                           currentDay(),
-                          style: const TextStyle(
-                              color: Colors.white,
+                          style: TextStyle(
+                              color: isDarkMode ? Colors.white: Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 25),
                         ),
                         const Spacer(),
                         Text(
                           weatherdata.date,
-                          style: const TextStyle(
-                              fontSize: 25, color: Colors.white),
+                          style:  TextStyle(
+                              fontSize: 25, color: isDarkMode ? Colors.white: Colors.black,),
                         )
                       ],
                     ),
@@ -234,9 +240,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Uv -------------------------------------- ${weatherdata.Uv}",
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 fontSize: 20,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white: Colors.black,
                               ),
                             ),
                           ],
@@ -249,9 +255,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Clouds ------------------------------- ${weatherdata.clouds}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white: Colors.black,
                               ),
                             ),
                           ],
@@ -264,9 +270,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Visibilty ------------------------------ ${weatherdata.visibility}",
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 fontSize: 20,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white: Colors.black,
                               ),
                             ),
                           ],
@@ -279,9 +285,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Wind Direction -------------------- ${weatherdata.visibility}",
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 fontSize: 20,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white: Colors.black,
                               ),
                             ),
                           ],
@@ -294,9 +300,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Humidity ----------------------------- ${weatherdata.humidity}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.white: Colors.black,
                               ),
                             ),
                           ],
@@ -304,19 +310,6 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(15),
-                height: 150,
-                width: 350,
-                decoration: BoxDecoration(
-                  color: Colors.black45,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Column(
-                  children: [],
                 ),
               ),
             ],

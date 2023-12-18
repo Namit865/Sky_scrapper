@@ -4,9 +4,7 @@ import 'package:weather_app/provider/provider.dart';
 import 'package:weather_app/views/splashscreen.dart';
 
 void main() => runApp(
-      ChangeNotifierProvider(
-        create: (context) => providers(),
-          child: const MyApp()),
+      const MyApp(),
     );
 
 class MyApp extends StatefulWidget {
@@ -19,12 +17,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => providers(),
-      child:  MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => providers(),
+        )
+      ],
+      builder: (context, child) => MaterialApp(
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-        themeMode: (Provider.of<providers>(context).Theme.isdark==false)?ThemeMode.light:ThemeMode.dark,
+        themeMode: Provider.of<providers>(context).themeDetails.isdark
+            ? ThemeMode.light
+            : ThemeMode.dark,
         debugShowCheckedModeBanner: false,
         home: Splash(),
       ),

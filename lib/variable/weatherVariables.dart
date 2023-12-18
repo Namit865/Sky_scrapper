@@ -24,10 +24,11 @@ class Weatherdata {
     this.windspeed = "",
     this.date = "",
     this.region = "",
-     this.Uv = "",
-     this.clouds = "",
-     this.visibility = "",
-     this.windDirection = "",
-     this.humidity = "",
+    this.Uv = "",
+    this.clouds = "",
+    this.visibility = "",
+    this.windDirection = "",
+    this.humidity = "",
   });
 }
+

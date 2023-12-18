@@ -1,6 +1,4 @@
-class theme{
+class ThemeDetails{
   bool isdark;
-
-  theme({required this.isdark});
-
+  ThemeDetails({required this.isdark});
 }
