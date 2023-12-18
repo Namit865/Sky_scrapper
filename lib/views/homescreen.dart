@@ -16,6 +16,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final TextEditingController _searchconntroller = TextEditingController();
   Weatherdata weatherdata = Weatherdata();
+  List<Weatherdata> forecast = [];
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: SingleChildScrollView(
           child: Column(
-            children: [
+            children: <Widget>[
               Row(
                 children: [
                   const Icon(
@@ -79,8 +80,14 @@ class _MainScreenState extends State<MainScreen> {
                           .themeToggle();
                     },
                     icon: Provider.of<providers>(context).themeDetails.isdark
-                        ? const Icon(CupertinoIcons.moon_stars,color: Colors.white,)
-                        : const Icon(CupertinoIcons.cloud_sun_rain_fill,color: Colors.white,),
+                        ? const Icon(
+                            CupertinoIcons.moon_stars,
+                            color: Colors.white,
+                          )
+                        : const Icon(
+                            CupertinoIcons.cloud_sun_rain_fill,
+                            color: Colors.white,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   const Icon(
@@ -126,16 +133,17 @@ class _MainScreenState extends State<MainScreen> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: weatherdata.tempraturecelsius,
-                      style:  TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white: Colors.black
-                      ),
+                      text: "${weatherdata.tempraturecelsius}",
+                      style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.black : Colors.white),
                     ),
-                    const TextSpan(
+                    TextSpan(
                       text: "°",
-                      style: TextStyle(fontSize: 40),
+                      style: TextStyle(
+                          fontSize: 40,
+                          color: isDarkMode ? Colors.black : Colors.white),
                     ),
                   ],
                 ),
@@ -143,10 +151,11 @@ class _MainScreenState extends State<MainScreen> {
               const SizedBox(height: 10),
               Text(
                 weatherdata.weathercondition,
-                style:  TextStyle(
-                    color: isDarkMode ? Colors.white: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,),
+                style: TextStyle(
+                  color: isDarkMode ? Colors.black : Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(
                 height: 20,
@@ -155,8 +164,9 @@ class _MainScreenState extends State<MainScreen> {
                 width: 350,
                 height: 50,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: isDarkMode ? Colors.black45: Colors.white54,),
+                  borderRadius: BorderRadius.circular(20),
+                  color: isDarkMode ? Colors.black45 : Colors.white54,
+                ),
                 child: Row(
                   children: [
                     const SizedBox(width: 15),
@@ -169,7 +179,10 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       "${weatherdata.precipitation}mm",
-                      style:  TextStyle(fontSize: 16, color: isDarkMode ? Colors.white: Colors.black,),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     const Spacer(),
                     const Icon(
@@ -177,9 +190,11 @@ class _MainScreenState extends State<MainScreen> {
                       color: Colors.white,
                     ),
                     Text(
-                      weatherdata.feelslike,
-                      style:  TextStyle(
-                          fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white: Colors.black,),
+                      "${weatherdata.feelslike}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     const Spacer(),
                     const Icon(
@@ -188,8 +203,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       "${weatherdata.windspeed}km/h",
-                      style:  TextStyle(
-                          color: isDarkMode ? Colors.white: Colors.black,
+                      style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold),
                     ),
@@ -208,7 +223,7 @@ class _MainScreenState extends State<MainScreen> {
                 width: 350,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: isDarkMode ? Colors.black45: Colors.white54,
+                  color: isDarkMode ? Colors.black45 : Colors.white54,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -218,15 +233,17 @@ class _MainScreenState extends State<MainScreen> {
                         Text(
                           currentDay(),
                           style: TextStyle(
-                              color: isDarkMode ? Colors.white: Colors.black,
+                              color: isDarkMode ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 25),
                         ),
                         const Spacer(),
                         Text(
-                          weatherdata.date,
-                          style:  TextStyle(
-                              fontSize: 25, color: isDarkMode ? Colors.white: Colors.black,),
+                          "${weatherdata.date}",
+                          style: TextStyle(
+                            fontSize: 25,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
                         )
                       ],
                     ),
@@ -240,9 +257,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Uv -------------------------------------- ${weatherdata.Uv}",
-                              style:  TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
-                                color: isDarkMode ? Colors.white: Colors.black,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
@@ -257,7 +274,7 @@ class _MainScreenState extends State<MainScreen> {
                               "Clouds ------------------------------- ${weatherdata.clouds}",
                               style: TextStyle(
                                 fontSize: 20,
-                                color: isDarkMode ? Colors.white: Colors.black,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
@@ -270,9 +287,9 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Visibilty ------------------------------ ${weatherdata.visibility}",
-                              style:  TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
-                                color: isDarkMode ? Colors.white: Colors.black,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
@@ -285,13 +302,13 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                               "Wind Direction -------------------- ${weatherdata.visibility}",
-                              style:  TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
-                                color: isDarkMode ? Colors.white: Colors.black,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                     Column(
@@ -302,15 +319,67 @@ class _MainScreenState extends State<MainScreen> {
                               "Humidity ----------------------------- ${weatherdata.humidity}",
                               style: TextStyle(
                                 fontSize: 20,
-                                color: isDarkMode ? Colors.white: Colors.black,
+                                color: isDarkMode ? Colors.white : Colors.black,
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Container(
+                  alignment: Alignment.center,
+                  width: 350,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.black45 : Colors.white54,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      topLeft: Radius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    "Weather Forecast",
+                    style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 22),
+                  )),
+              Container(
+                height: 180,
+                width: 350,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.black45 : Colors.white54,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                child: ListView.builder(
+                  itemBuilder: (context, index) => Card(
+                    color: Colors.black45,
+                    child: ListTile(
+                      title: Text("${weatherdata.fordate[index]}",
+                          style: TextStyle(
+                              color: isDarkMode ? Colors.black : Colors.white,
+                              fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                        "Maxminum Average Temprature : ${weatherdata.formaxtemp[index]}°C \nMaxminum Average Temprature:${weatherdata.formintemp[index]}°C",
+                        style: TextStyle(
+                            color: isDarkMode ? Colors.black : Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  itemCount: weatherdata.formaxtemp.length,
+                ),
+              ),
+              const SizedBox(
+                height: 20,
               ),
             ],
           ),

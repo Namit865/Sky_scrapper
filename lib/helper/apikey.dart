@@ -9,10 +9,10 @@ class ApiHelper {
   static final ApiHelper apiHelper = ApiHelper._();
 
   Future<dynamic> fetchData(String cityname) async {
-    {
+
       String apiKey = "b3a8605b591c4a77ad6120424231112";
       String apiUrl =
-          "http://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$cityname&days=2&aqi=no&alerts=yes";
+          "http://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$cityname&days=10&aqi=no&alerts=yes";
 
       http.Response response = await http.get(Uri.parse(apiUrl));
 
@@ -21,6 +21,7 @@ class ApiHelper {
 
         Map<String, dynamic> location = data['location'];
         Map<String, dynamic> currentdata = data['current'];
+        List forecast = data['forecast']['forecastday'];
 
         Weatherdata res = Weatherdata(
           location: location['name'] ?? '',
@@ -37,15 +38,16 @@ class ApiHelper {
           visibility: currentdata['vis_km'].toString(),
           windDirection: currentdata['NNE'].toString(),
           humidity: currentdata['humidity'].toString(),
-
+          fordate: forecast.map((e) => e['date'].toString()).toList(),
+          formintemp: forecast.map((e) => e['day']['mintemp_c'].toString()).toList(),
+          formaxtemp: forecast.map((e) => e['day']['maxtemp_c'].toString()).toList(),
+            forday: forecast.map((e) => e['day']['condition']['icon'].toString()).toList()
         );
 
         return res;
       }
-      else{
-        print("API request failed with status code: ${response.statusCode}");
-      }
-    }
+
+
 
   }
 

@@ -13,8 +13,16 @@ class Weatherdata {
   String visibility;
   String windDirection;
   String humidity;
+  List<String> formaxtemp;
+  List<String> formintemp;
+  List<String> fordate;
+  List<String> forday;
 
   Weatherdata({
+    this.forday = const [],
+    this.fordate = const [],
+    this.formaxtemp = const [],
+    this.formintemp = const [],
     this.location = "",
     this.feelslike = "",
     this.precipitation = "",
