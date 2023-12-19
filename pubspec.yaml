@@ -38,6 +38,8 @@ dependencies:
   http:
   provider:
   shared_preferences:
+  lottie:
+  connectivity_plus:
 
 
 dev_dependencies:

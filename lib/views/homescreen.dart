@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +17,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  StreamController<bool> connectivityStream =
+      StreamController<bool>();
+  late ConnectivityResult connectivityResult;
   final TextEditingController _searchconntroller = TextEditingController();
   Weatherdata weatherdata = Weatherdata();
   List<Weatherdata> forecast = [];
@@ -22,6 +28,27 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     fetchdata("Rajkot");
+    checkConnectivity();
+
+    Connectivity().onConnectivityChanged.listen((result) {
+      if (result != connectivityResult) {
+        setState(() {
+          connectivityResult = result;
+          connectivityStream.add(isConnected(result));
+        });
+      }
+    });
+  }
+
+  void checkConnectivity() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    connectivityStream.add(isConnected(connectivityResult));
+  }
+
+  bool isConnected(ConnectivityResult result) {
+    return result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.ethernet;
   }
 
   Future<void> fetchdata(String cityname) async {
@@ -49,340 +76,363 @@ class _MainScreenState extends State<MainScreen> {
     var provider = Provider.of<providers>(context);
     var isDarkMode = provider.themeDetails.isdark;
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.only(top: 40, left: 10, right: 10),
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/images/1.jpg"), fit: BoxFit.fill),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Row(
+      body: StreamBuilder(
+        stream: connectivityStream.stream,
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.data == true) {
+            return onlineContent(isDarkMode);
+          } else {
+            return offlineContent();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget onlineContent(bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.only(top: 40, left: 10, right: 10),
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("assets/images/1.jpg"), fit: BoxFit.fill),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_sharp,
+                  color: Colors.white,
+                ),
+                Text(
+                  weatherdata.location,
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                Text(",${weatherdata.region}",
+                    style: const TextStyle(color: Colors.white, fontSize: 12)),
+                const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    Provider.of<providers>(context, listen: false)
+                        .themeToggle();
+                  },
+                  icon: Provider.of<providers>(context).themeDetails.isdark
+                      ? const Icon(
+                          CupertinoIcons.moon_stars,
+                          color: Colors.white,
+                        )
+                      : const Icon(
+                          CupertinoIcons.cloud_sun_rain_fill,
+                          color: Colors.white,
+                        ),
+                ),
+                const SizedBox(width: 12),
+                const Icon(
+                  CupertinoIcons.bell,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  height: 50,
+                  width: 400,
+                  child: TextField(
+                    cursorColor: Colors.white70,
+                    controller: _searchconntroller,
+                    style: const TextStyle(color: Colors.white),
+                    onChanged: (value) {
+                      fetchdata(value);
+                    },
+                    decoration: const InputDecoration(
+                      hintText: "Search",
+                      hintStyle: TextStyle(fontSize: 18, color: Colors.white),
+                      prefixIcon: Icon(
+                        CupertinoIcons.search,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 180,
+              width: 180,
+              child: Image.network(
+                "http:${weatherdata.weatherImage}",
+                fit: BoxFit.fill,
+              ),
+            ),
+            RichText(
+              text: TextSpan(
                 children: [
+                  TextSpan(
+                    text: "${weatherdata.tempraturecelsius}",
+                    style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.black : Colors.white),
+                  ),
+                  TextSpan(
+                    text: "°",
+                    style: TextStyle(
+                        fontSize: 40,
+                        color: isDarkMode ? Colors.black : Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              weatherdata.weathercondition,
+              style: TextStyle(
+                color: isDarkMode ? Colors.black : Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              width: 350,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: isDarkMode ? Colors.black45 : Colors.white54,
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 15),
                   const Icon(
-                    Icons.location_on_sharp,
+                    Icons.water_drop_rounded,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "${weatherdata.precipitation}mm",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.thermostat_rounded,
                     color: Colors.white,
                   ),
                   Text(
-                    weatherdata.location,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    "${weatherdata.feelslike}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
-                  Text(",${weatherdata.region}",
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 12)),
                   const Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      Provider.of<providers>(context, listen: false)
-                          .themeToggle();
-                    },
-                    icon: Provider.of<providers>(context).themeDetails.isdark
-                        ? const Icon(
-                            CupertinoIcons.moon_stars,
-                            color: Colors.white,
-                          )
-                        : const Icon(
-                            CupertinoIcons.cloud_sun_rain_fill,
-                            color: Colors.white,
-                          ),
-                  ),
-                  const SizedBox(width: 12),
                   const Icon(
-                    CupertinoIcons.bell,
+                    CupertinoIcons.wind,
                     color: Colors.white,
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  SizedBox(
-                    height: 50,
-                    width: 400,
-                    child: TextField(
-                      cursorColor: Colors.white70,
-                      controller: _searchconntroller,
-                      style: const TextStyle(color: Colors.white),
-                      onChanged: (value) {
-                        fetchdata(value);
-                      },
-                      decoration: const InputDecoration(
-                        hintText: "Search",
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.white),
-                        prefixIcon: Icon(
-                          CupertinoIcons.search,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                  Text(
+                    "${weatherdata.windspeed}km/h",
+                    style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    width: 15,
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 180,
-                width: 180,
-                child: Image.network(
-                  "http:${weatherdata.weatherImage}",
-                  fit: BoxFit.fill,
-                ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Container(
+              padding: const EdgeInsets.all(20),
+              height: 270,
+              width: 350,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: isDarkMode ? Colors.black45 : Colors.white54,
               ),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "${weatherdata.tempraturecelsius}",
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.black : Colors.white),
-                    ),
-                    TextSpan(
-                      text: "°",
-                      style: TextStyle(
-                          fontSize: 40,
-                          color: isDarkMode ? Colors.black : Colors.white),
-                    ),
-                  ],
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        currentDay(),
+                        style: TextStyle(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "${weatherdata.date}",
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Uv -------------------------------------- ${weatherdata.Uv}",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Clouds ------------------------------- ${weatherdata.clouds}",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Visibilty ------------------------------ ${weatherdata.visibility}",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Wind Direction -------------------- ${weatherdata.visibility}",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Humidity ----------------------------- ${weatherdata.humidity}",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                weatherdata.weathercondition,
-                style: TextStyle(
-                  color: isDarkMode ? Colors.black : Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+                alignment: Alignment.center,
                 width: 350,
                 height: 50,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
                   color: isDarkMode ? Colors.black45 : Colors.white54,
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 15),
-                    const Icon(
-                      Icons.water_drop_rounded,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      "${weatherdata.precipitation}mm",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.thermostat_rounded,
-                      color: Colors.white,
-                    ),
-                    Text(
-                      "${weatherdata.feelslike}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      CupertinoIcons.wind,
-                      color: Colors.white,
-                    ),
-                    Text(
-                      "${weatherdata.windspeed}km/h",
-                      style: TextStyle(
-                          color: isDarkMode ? Colors.white : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(
-                      width: 15,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Container(
-                padding: const EdgeInsets.all(20),
-                height: 270,
-                width: 350,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: isDarkMode ? Colors.black45 : Colors.white54,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          currentDay(),
-                          style: TextStyle(
-                              color: isDarkMode ? Colors.white : Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25),
-                        ),
-                        const Spacer(),
-                        Text(
-                          "${weatherdata.date}",
-                          style: TextStyle(
-                            fontSize: 25,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Uv -------------------------------------- ${weatherdata.Uv}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: isDarkMode ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "Clouds ------------------------------- ${weatherdata.clouds}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: isDarkMode ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "Visibilty ------------------------------ ${weatherdata.visibility}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: isDarkMode ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "Wind Direction -------------------- ${weatherdata.visibility}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: isDarkMode ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "Humidity ----------------------------- ${weatherdata.humidity}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: isDarkMode ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Container(
-                  alignment: Alignment.center,
-                  width: 350,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.black45 : Colors.white54,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      topLeft: Radius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    "Weather Forecast",
-                    style: TextStyle(
-                        color: isDarkMode ? Colors.white : Colors.black,
-                        fontSize: 22),
-                  )),
-              Container(
-                height: 180,
-                width: 350,
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.black45 : Colors.white54,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(20),
                   ),
                 ),
-                child: ListView.builder(
-                  itemBuilder: (context, index) => Card(
-                    color: Colors.black45,
-                    child: ListTile(
-                      title: Text("${weatherdata.fordate[index]}",
-                          style: TextStyle(
-                              color: isDarkMode ? Colors.black : Colors.white,
-                              fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        "Maxminum Average Temprature : ${weatherdata.formaxtemp[index]}°C \nMaxminum Average Temprature:${weatherdata.formintemp[index]}°C",
+                child: Text(
+                  "Weather Forecast",
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 22),
+                )),
+            Container(
+              height: 180,
+              width: 350,
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.black45 : Colors.white54,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
+              child: ListView.builder(
+                itemBuilder: (context, index) => Card(
+                  color: isDarkMode ? Colors.white54: Colors.black45,
+                  child: ListTile(
+                    title: Text("${weatherdata.fordate[index]}",
                         style: TextStyle(
                             color: isDarkMode ? Colors.black : Colors.white,
-                            fontWeight: FontWeight.bold),
-                      ),
+                            fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                      "Maxminum Average Temprature : ${weatherdata.formaxtemp[index]}°C \nMaxminum Average Temprature:${weatherdata.formintemp[index]}°C",
+                      style: TextStyle(
+                          color: isDarkMode ? Colors.black : Colors.white,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
-                  itemCount: weatherdata.formaxtemp.length,
                 ),
+                itemCount: weatherdata.formaxtemp.length,
               ),
-              const SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget offlineContent() {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          "Check Your Internet Connection",
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       ),
     );
