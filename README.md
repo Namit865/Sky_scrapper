@@ -11,3 +11,6 @@ as per search weather show of particular place.
 ![Screenshot 2023-12-18 122316](https://github.com/Namit865/Sky_scrapper/assets/135067345/864f5ff2-1a21-4d7f-900c-8aa1e0cf2f63)
 
 light dark theme 
+
+![Screenshot 2023-12-19 171518](https://github.com/Namit865/Sky_scrapper/assets/135067345/808c81af-b77b-4569-97e8-04a34a31af7d)
+offline screen preview
