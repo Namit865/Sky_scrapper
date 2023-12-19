@@ -17,38 +17,17 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  StreamController<bool> connectivityStream =
-      StreamController<bool>();
-  late ConnectivityResult connectivityResult;
   final TextEditingController _searchconntroller = TextEditingController();
   Weatherdata weatherdata = Weatherdata();
   List<Weatherdata> forecast = [];
+  late Stream<ConnectivityResult> streamconnectivity;
 
   @override
   void initState() {
     super.initState();
     fetchdata("Rajkot");
-    checkConnectivity();
-
-    Connectivity().onConnectivityChanged.listen((result) {
-      if (result != connectivityResult) {
-        setState(() {
-          connectivityResult = result;
-          connectivityStream.add(isConnected(result));
-        });
-      }
-    });
-  }
-
-  void checkConnectivity() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    connectivityStream.add(isConnected(connectivityResult));
-  }
-
-  bool isConnected(ConnectivityResult result) {
-    return result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.ethernet;
+    Connectivity connectivity = Connectivity();
+    streamconnectivity = connectivity.onConnectivityChanged;
   }
 
   Future<void> fetchdata(String cityname) async {
@@ -77,12 +56,18 @@ class _MainScreenState extends State<MainScreen> {
     var isDarkMode = provider.themeDetails.isdark;
     return Scaffold(
       body: StreamBuilder(
-        stream: connectivityStream.stream,
-        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (snapshot.data == true) {
-            return onlineContent(isDarkMode);
+        stream: streamconnectivity,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data == ConnectivityResult.mobile) {
+              return onlineContent(isDarkMode);
+            } else if (snapshot.data == ConnectivityResult.wifi) {
+              return onlineContent(isDarkMode);
+            } else {
+              return offlineContent();
+            }
           } else {
-            return offlineContent();
+            return Text("${snapshot.error}");
           }
         },
       ),
@@ -401,7 +386,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               child: ListView.builder(
                 itemBuilder: (context, index) => Card(
-                  color: isDarkMode ? Colors.white54: Colors.black45,
+                  color: isDarkMode ? Colors.white54 : Colors.black45,
                   child: ListTile(
                     title: Text("${weatherdata.fordate[index]}",
                         style: TextStyle(
