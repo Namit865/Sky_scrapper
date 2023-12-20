@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:weather_app/views/homescreen.dart';
 
@@ -15,7 +14,7 @@ class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -28,19 +27,23 @@ class _SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+        body: Stack(children: [
+      SizedBox(
+        height: double.infinity,
+        child: Image.asset("assets/images/2.jpg", fit: BoxFit.fill),
+      ),
+      Container(
         alignment: Alignment.center,
         height: double.infinity,
         width: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/images/2.jpg"), fit: BoxFit.fill),
-        ),
-        child: const Text(
+        child: Text(
           "Fasten Your SeatBelts Gentleman's Weather is About to Change 👿👿",
-          style: TextStyle(color: Colors.white, fontSize: 40,),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 40,
+          ),
         ),
       ),
-    );
+    ]));
   }
 }
